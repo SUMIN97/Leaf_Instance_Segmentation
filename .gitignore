@@ -1,0 +1,6 @@
+./data/
+./experiments/
+./__pycache__/
+./idea/
+./test.ipynb
+
