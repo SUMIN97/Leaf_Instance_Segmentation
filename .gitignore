@@ -3,4 +3,6 @@
 ./__pycache__/
 ./idea/
 ./test.ipynb
+./models/__pycache__/
+./utils/__pycache__/
 

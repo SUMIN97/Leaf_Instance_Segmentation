@@ -33,3 +33,5 @@ def get_colored_tensor(labelmap, palette=P):
     colormap = colormap.reshape(h, w, 3).permute(2,0,1)
 
     return colormap.type(torch.uint8)
+
+    

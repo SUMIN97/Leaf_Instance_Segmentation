@@ -2,27 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class DropoutConv(nn.Module):
-    """(convolution => [BN] => ReLU) * 2"""
-
-    def __init__(self, in_channels, out_channels, middle_channels):
-        super().__init__()
-
-        self.conv = nn.Sequential(
-
-
-            nn.Conv2d(in_channels, middle_channels, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(middle_channels),
-            nn.ReLU(inplace=True),
-
-            nn.Dropout(0.5),
-            nn.Conv2d(middle_channels, out_channels, kernel_size=3, padding=1, bias=True),
-            nn.ReLU(inplace=True),
-        )
-
-    def forward(self, x):
-        return self.conv(x)
-
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 

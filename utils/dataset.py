@@ -37,7 +37,7 @@ class IPELPlantDataset(Dataset):
 
     def __getitem__(self, index):
         self.index = index
-        data = self.load_data(index)
+        data, neighbor = self.load_data(index)
 
         cfg = self.cfg
         if self.augmentation:
@@ -58,5 +58,29 @@ class IPELPlantDataset(Dataset):
         label = torch.from_numpy(data['label'].astype(np.int64))
         distmap = torch.from_numpy(data['distance_map'].astype(np.float32)) / 255.0  # / 255.0 #0~1
         distmap = distmap.unsqueeze(0)
+        neighbor = torch.from_numpy(neighbor)
 
-        return rgb, label, distmap
+        return rgb, label, distmap, neighbor
+
+    def __len__(self):
+        return len(self.plants)
+
+    def load_data(self, i):
+        plant = self.plants[i]
+        paths = self.data_paths[plant]
+        input, neighbor = {}, ''
+        for d in self.cfg.load_data_list:
+            if d == 'neighbor':
+                neighbor = np.load(paths[d])
+            elif d == 'centers':
+                continue
+            elif d == 'label':
+                label = np.array(Image.open(paths[d]))
+                input[d] = cv2.resize(label, (self.cfg.img_size, self.cfg.img_size), interpolation=cv2.INTER_NEAREST)
+            elif d == 'rgb' or d == 'distance_map':
+                data = np.array(Image.open(paths[d]))
+                input[d] = cv2.resize(data, (self.cfg.img_size, self.cfg.img_size), interpolation=cv2.INTER_NEAREST)
+            else:
+                assert 'Error in load data'
+
+        return input, neighbor
