@@ -17,28 +17,28 @@ class WNet(nn.Module):
 
         self.distmap_head = nn.Sequential(
             nn.Dropout(0.5),
-            nn.Conv2d(self.unet_ch, self.unet_ch, kernel_size=3, padding=1, bias=False),
+            nn.Conv2d(self.unet_ch, 1, kernel_size=3, padding=1),
             nn.ReLU(inplace=True)
         )
-        self.distmap_predictor = nn.Conv2d(64, 1, kernel_size=1)
+        # self.distmap_predictor = nn.Conv2d(64, 1, kernel_size=1)
 
         self.dfeat_head = nn.Sequential(
-            nn.Conv2d(64, self.dfeat_ch, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(self.dfeat_ch),
-            nn.ReLU()
+            nn.Conv2d(64, self.dfeat_ch, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True)
         )
         self.emb_predictor = nn.Conv2d(64, self.emb_ch, kernel_size=1)
 
-        for predictor in [self.distmap_predictor, self.emb_predictor]:
-            nn.init.normal_(predictor.weight, 0, 0.001)
-            nn.init.constant_(predictor.bias, 0)
+        # for predictor in [self.distmap_predictor]:
+        #     nn.init.normal_(predictor.weight, 0, 0.001)
+        #     nn.init.constant_(predictor.bias, 0)
 
 
-    def forward(self, input):
+
+    def forward(self, input, user_data=''):
         x = self.dnet(input)
 
         distmap = self.distmap_head(x)
-        distmap = self.distmap_predictor(distmap)
+        # distmap = self.distmap_predictor(distmap)
 
         dfeat = self.dfeat_head(x)
         dfeat = F.normalize(dfeat, p=2, dim=1)

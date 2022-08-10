@@ -45,9 +45,8 @@ def init_experiment(args):
         cfg.device=torch.device('cpu')
 
     # save config
-    cfg_save_path = exp_path / 'config.yaml'
-    cfg_save_path = cfg_save_path.cwd()
-    with open(cfg_save_path, 'w') as f:
+    cfg_save_path = exp_path / 'config.yml'
+    with cfg_save_path.open('w') as f:
         yaml.dump(cfg, f)
 
     return cfg

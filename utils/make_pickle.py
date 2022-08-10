@@ -5,8 +5,8 @@ import random
 data_png_path = Path('/home/lab/ssd2/Plant/Code/Leaf_Instance_Segmentation/data/cvppp/train')
 neighbor_path = Path('/home/lab/ssd2/Plant/Code/PEIS/data/neighbors_dilation10')
 distance_map_path = Path('/home/lab/ssd2/Plant/Code/PEIS/data/dismap')
-data_dict = {}
-val = {}
+train_dict = {}
+val_dict = {}
 #key pattern example : A1_plant001
 
 #rgb, label, center
@@ -20,33 +20,37 @@ for folders_path in data_png_path.iterdir():
         if role == 'fg' or role == 'centers': continue
 
         if plant in plants:
-            data_dict[a_folder+'_'+plant].update({role : str(path)})
+            train_dict[a_folder+'_'+plant].update({role : str(path)})
         else:
-            data_dict[a_folder+'_'+plant] = {role: str(path)}
+            train_dict[a_folder+'_'+plant] = {role: str(path)}
             plants.append(plant)
 
 #neighbor
 for path in neighbor_path.iterdir():
     plant = path.stem
-    data_dict[plant].update({'neighbor':str(path)})
+    train_dict[plant].update({'neighbor':str(path)})
 
 #distance_map
 for path in distance_map_path.glob("*/*.png"):
     a_folder = path.parts[-2]
     plant = path.stem
-    data_dict[a_folder+'_'+plant].update({'distance_map':str(path)})
+    train_dict[a_folder+'_'+plant].update({'distance_map':str(path)})
 
+print(f'total {len(train_dict)}')
 #Split train and val
-val_plants = random.sample(list(data_dict.keys()), 10)
+val_plants = random.sample(list(train_dict.keys()), 10)
 for p in val_plants:
-    d = data_dict.pop(p)
-    val[p] = d
+    d = train_dict.pop(p)
+    val_dict[p] = d
+
+print(f"train len{len(train_dict)}")
+print(f"val len{len(val_dict)}")
 
 with open('/home/lab/ssd2/Plant/Code/Leaf_Instance_Segmentation/data/train.pickle', 'wb') as f:
-    pickle.dump(data_dict, f)
+    pickle.dump(train_dict, f)
 
 with open('/home/lab/ssd2/Plant/Code/Leaf_Instance_Segmentation/data/val.pickle', 'wb') as f:
-    pickle.dump(data_dict, f)
+    pickle.dump(val_dict, f)
 
 
 

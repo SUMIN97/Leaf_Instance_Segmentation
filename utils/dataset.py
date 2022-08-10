@@ -41,8 +41,8 @@ class IPELPlantDataset(Dataset):
 
         cfg = self.cfg
         if self.augmentation:
-
-            data = random_perspective(data)
+            if random.random() < cfg.random_perspective:
+                data = random_perspective(data)
 
             # Flip up-down
             if random.random() < cfg.flipud:
@@ -55,6 +55,7 @@ class IPELPlantDataset(Dataset):
         # change dtype
         # rgb = data['rgb'].transpose((2,0,1)) / 255.0
         rgb = torch.from_numpy(data['rgb'].transpose((2, 0, 1)) / 255.0)
+        rgb = self.input_normalize(rgb)
         label = torch.from_numpy(data['label'].astype(np.int64))
         distmap = torch.from_numpy(data['distance_map'].astype(np.float32)) / 255.0  # / 255.0 #0~1
         distmap = distmap.unsqueeze(0)
@@ -84,3 +85,22 @@ class IPELPlantDataset(Dataset):
                 assert 'Error in load data'
 
         return input, neighbor
+
+    def input_normalize(self,image):
+        # total channel
+        # image = torch.div(image - torch.mean(image), torch.std(image))
+
+        # each channel
+        orig_dtype = image.dtype
+        image_mean = torch.mean(image, dim=(-1, -2, -3))
+        stddev = torch.std(image, axis=(-1, -2, -3))
+        num_pixels = torch.tensor(torch.numel(image), dtype=torch.float32)
+        min_stddev = torch.rsqrt(num_pixels)
+        adjusted_stddev = torch.max(stddev, min_stddev)
+        # normalize image
+        image -= image_mean
+        image = torch.div(image, adjusted_stddev)
+        # make sure that image output dtype  == input dtype
+        assert image.dtype == orig_dtype
+
+        return image
